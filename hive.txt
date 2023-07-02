@@ -1,0 +1,125 @@
+ambari-admin-password-reset
+
+hdfs dfs -ls /user/root
+hdfs dfs -mkdir /user/root/bigdata
+hdfs dfs -ls /user/root
+
+///////////////////////////////////////////////////////////////////////////////////////////
+vi datos.csv  // Crear un csv en root
+1,Juan
+2,Pedro
+Esc + :wq + enter
+///////////////////////////////////////////////////////////////////////////////////////////
+
+cat  datos.csv
+hdfs dfs -put datos.csv /user/root/bigdata
+hdfs dfs -ls /user/root/bigdata
+hdfs dfs -chmod -R 777 /user/root/bigdata
+hdfs dfs -ls /user/root/bigdata
+
+sudo hive
+
+CREATE EXTERNAL TABLE IF NOT EXISTS datos(
+  id INT,
+  name STRING
+)
+COMMENT 'Data'
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/user/root/bigdata';
+
+DESCRIBE datos;
+LOAD DATA INPATH '/user/root/bigdata/datos.csv' INTO TABLE datos;
+
+SELECT * FROM ;
+DROP TABLE datos;
+
+///////////////////////////////////////////////////////////////////////////////////////////
+Subir archivos por Ambari  diabetes.csv en hdfs /user/root/bigdata con los permisos
+
+hdfs dfs -ls /user/root/bigdata
+sudo -u hdfs hdfs dfs -chmod -R 777 /user/root/bigdata
+hdfs dfs -ls /user/root/bigdata
+sudo hive
+
+CREATE EXTERNAL TABLE IF NOT EXISTS diabetes(
+  genero INT,
+  edad STRING,
+  hypertension INT,
+  corazon INT
+)
+COMMENT 'Diabetes'
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/user/root/bigdata';
+
+DESCRIBE diabetes;
+LOAD DATA INPATH '/user/root/bigdata/diabetes2.csv' INTO TABLE diabetes;
+
+SELECT * FROM diabetes LIMIT 10;
+
+POR QUE SALE NULL EN LA PRIMERA COLUMNA?
+
+SHOW TABLES;
+DESCRIBE diabetes;
+
+CORRIGE 
+ALTER TABLE diabetes CHANGE COLUMN genero genero STRING;
+
+SE SOLUCIONO?
+DESCRIBE diabetes;
+SELECT * FROM diabetes LIMIT 10;
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Estadisticos
+
+SELECT AVG(edad) AS media_edad FROM diabetes;
+SELECT MAX(edad) AS max_edad, MIN(edad) AS min_edad FROM diabetes;
+SELECT SUM(edad) AS suma_edad FROM diabetes;
+SELECT COUNT(edad) AS total_registros, AVG(edad) AS media_edad, MAX(edad) AS max_edad, MIN(edad) AS min_edad FROM diabetes;
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Subir el archivo completo
+ - Crear una tabla nueva
+ - Guardar en una carpeta
+ - Dar los permisos
+ - Importar datos a la tabla
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+hdfs dfs -rm /user/root/bigdata/datos.csv  ---- Borrar archivos
+hdfs dfs -rm -r /user/root/bigdata         ---- Borrar carpetas									
+///////////////////////////////////////////////////////////////////////////////////////////
+
+hive
+SHOW DATABASES;
+CREATE DATABASE bigdata_in;
+USE bigdata_in;
+
+CREATE TABLE datos_in(
+id INT,
+name STRING)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+SHOW TABLES;
+DESCRIBE datos_in;
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+INSERT INTO datos_in VALUES
+(1,'Jeanpier'),
+(2,'Jorge'),
+(3,'Pablo'),
+(4,'Jean');
+
+DESCRIBE datos_in;
+SELECT * FROM datos_in;
+
+
+
